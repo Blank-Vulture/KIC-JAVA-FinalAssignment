@@ -2,8 +2,8 @@
 
 public class Wizard extends Human {
 	public Wizard(String name) {
-		//this.name = name;
-		//this.hp = 100;
+		this.name = name;
+		this.hp = 100;
 	}
 	
 	public void run() {
