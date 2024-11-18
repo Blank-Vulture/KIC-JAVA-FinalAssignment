@@ -7,4 +7,9 @@ public class Hero extends Fighter {
         this.baseAttackPower = baseAttackPower;
         this.runAway = false;
     }
+
+    public int getBaseAttackPower() {
+        return baseAttackPower;
+    }
+
 }
