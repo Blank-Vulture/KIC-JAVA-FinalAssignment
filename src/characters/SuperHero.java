@@ -8,16 +8,19 @@ import utility.Talk;
 import java.util.Scanner;
 
 /**
- * 勇者クラス
+ * スーパー勇者クラス
  */
-public class Hero extends Character implements Fighter, Runner, Talk {
+public class SuperHero extends Character implements Fighter, Runner, Talk {
     private int baseAttackPower;
     private boolean runAway;
+    private boolean isFlying;
 
-    public Hero(String name, int maxHp, int baseAttackPower) {
+    public SuperHero(String name, int maxHp, int baseAttackPower) {
         super(name, maxHp);
-        this.baseAttackPower = baseAttackPower;
+        setMaxHp(maxHp * 2); // スーパー勇者はHPが2倍
+        this.baseAttackPower = baseAttackPower * 2; // スーパー勇者は攻撃力が2倍
         this.runAway = false;
+        this.isFlying = false; // 初期状態では地上にいる
     }
 
     @Override
@@ -37,8 +40,9 @@ public class Hero extends Character implements Fighter, Runner, Talk {
         System.out.println("\nあなたのターンです。行動を選択してください。");
         System.out.println("1: 攻撃");
         System.out.println("2: 逃げる");
-        System.out.println("3: 眠る");
-        System.out.print("選択肢（1-3）: ");
+        System.out.println("3: " + (isFlying ? "着陸する" : "飛ぶ"));
+        System.out.println("4: 眠る");
+        System.out.print("選択肢（1-4）: ");
         int choice;
         try {
             choice = Integer.parseInt(scanner.nextLine());
@@ -59,6 +63,14 @@ public class Hero extends Character implements Fighter, Runner, Talk {
                 runAway();
                 break;
             case 3:
+                // 飛ぶ or 着陸する
+                if (isFlying) {
+                    land();
+                } else {
+                    fly();
+                }
+                break;
+            case 4:
                 // 眠る
                 sleep();
                 break;
@@ -72,6 +84,11 @@ public class Hero extends Character implements Fighter, Runner, Talk {
 
     @Override
     public void takeDamage(int amount) {
+        if (isFlying) {
+            // 飛んでいる場合はダメージを半減
+            amount /= 2;
+            System.out.println(getName() + "は飛んでいるのでダメージが半減した！");
+        }
         setHp(getHp() - amount);
         System.out.println(getName() + "は" + amount + "のダメージを受けた。（HP: " + getHp() + "/" + getMaxHp() + "）");
         if (!isAlive()) {
@@ -96,10 +113,35 @@ public class Hero extends Character implements Fighter, Runner, Talk {
         runAway = false;
     }
 
+    // 飛ぶメソッド
+    public void fly() {
+        if (!isFlying) {
+            isFlying = true;
+            System.out.println(getName() + "は空高く飛び上がった！");
+        } else {
+            System.out.println(getName() + "は既に飛んでいる！");
+        }
+    }
+
+    // 着陸するメソッド
+    public void land() {
+        if (isFlying) {
+            isFlying = false;
+            System.out.println(getName() + "は地上に降り立った！");
+        } else {
+            System.out.println(getName() + "は既に地上にいる！");
+        }
+    }
+
+    // 眠るメソッド
     public void sleep() {
         System.out.println(getName() + "は眠ってHPを回復した！");
         setHp(getMaxHp());
         System.out.println("（HP: " + getHp() + "/" + getMaxHp() + "）");
+    }
+
+    public boolean isFlying() {
+        return isFlying;
     }
 
     public int getBaseAttackPower() {

@@ -3,125 +3,135 @@ package system;
 import utility.Character;
 import utility.Fighter;
 import utility.Runner;
+import characters.Princess;
+import characters.SuperHero;
 
-import java.util.Scanner;
-
+/**
+ * バトルクラス
+ */
 public class Battle {
-
-    private Fighter participant1;
-    private Fighter participant2;
+    private Character participant1; // プレイヤー（勇者）
+    private Character participant2; // 敵
     private int turnCount;
     private boolean battleOver;
-    private Scanner scanner; // Scannerをフィールドとして宣言
+    private Princess princess;
+    private int originalAttackPower; // スーパー勇者の元の攻撃力を保存
 
-    // コンストラクタ
-    public Battle(Fighter participant1, Fighter participant2) {
+    public Battle(Character participant1, Character participant2) {
         this.participant1 = participant1;
         this.participant2 = participant2;
         this.turnCount = 0;
         this.battleOver = false;
-        this.scanner = new Scanner(System.in); // Scannerを初期化
+        this.princess = null;
     }
 
-    // バトルを開始する
+    // お姫様が応援する場合のコンストラクタ
+    public Battle(Character participant1, Character participant2, Princess princess) {
+        this(participant1, participant2);
+        this.princess = princess;
+        if (participant1 instanceof SuperHero) {
+            // スーパー勇者の元の攻撃力を保存
+            this.originalAttackPower = ((SuperHero) participant1).getBaseAttackPower();
+        }
+    }
+
     public void startBattle() {
-        System.out.println(((Character) participant1).getName() + "と" +
-                ((Character) participant2).getName() + "の戦いが始まった！");
+        // バトル開始前に逃走状態とHPをリセット
+        resetParticipants();
+
+        System.out.println(participant1.getName() + "と" +
+                participant2.getName() + "の戦いが始まった！");
         determineTurnOrder();
         while (!isBattleOver()) {
             executeTurn();
         }
         endBattle();
-        scanner.close(); // バトル終了時にScannerを閉じる
     }
 
-    // ターンを実行する
     public void executeTurn() {
         turnCount++;
         System.out.println("\nターン " + turnCount + ":");
 
-        // ヒーローの行動をユーザーが選択
-        if (participant1 instanceof characters.Hero && ((Character) participant1).isAlive()) {
-            characters.Hero hero = (characters.Hero) participant1;
-            if (!hero.isRunAway()) {
-                System.out.println("あなたのターンです。行動を選択してください。");
-                System.out.println("1: 攻撃");
-                System.out.println("2: 逃げる");
-                System.out.println("3: 眠る");
-                System.out.print("選択肢（1-3）: ");
-                int choice;
-                try {
-                    choice = Integer.parseInt(scanner.nextLine());
-                } catch (Exception e) {
-                    choice = 1;
-                    System.out.println("無効な入力です。攻撃します。");
-                }
-                switch (choice) {
-                    case 1:
-                        hero.attack(participant2);
-                        break;
-                    case 2:
-                        hero.runAway();
-                        battleOver = true;
-                        return;
-                    case 3:
-                        hero.sleep();
-                        break;
-                    default:
-                        System.out.println("無効な選択です。攻撃します。");
-                        hero.attack(participant2);
-                }
-            } else {
-                System.out.println(hero.getName() + "は逃げ出した！");
+        // お姫様が応援する場合
+        if (princess != null && participant1 instanceof SuperHero) {
+            princess.cheer((SuperHero) participant1);
+        }
+
+        // participant1の行動（ユーザー入力による）
+        if (participant1.isAlive()) {
+            if (participant1 instanceof Fighter) {
+                ((Fighter) participant1).attack((Fighter) participant2);
+            }
+
+            if (!participant2.isAlive() || (participant2 instanceof Runner && ((Runner) participant2).isRunAway())) {
                 battleOver = true;
                 return;
             }
-        } else {
-            participant1.attack(participant2);
+            if (participant1 instanceof Runner && ((Runner) participant1).isRunAway()) {
+                battleOver = true;
+                return;
+            }
         }
 
-        if (!((Character) participant2).isAlive()) {
-            battleOver = true;
-            return;
+        // participant2の行動
+        if (participant2.isAlive()) {
+            if (participant2 instanceof Fighter) {
+                ((Fighter) participant2).attack((Fighter) participant1);
+            }
+            if (!participant1.isAlive() || (participant1 instanceof Runner && ((Runner) participant1).isRunAway())) {
+                battleOver = true;
+                return;
+            }
         }
 
-        // 敵のターン
-        if (participant2 instanceof characters.Slime && ((Character) participant2).isAlive()) {
-            characters.Slime slime = (characters.Slime) participant2;
-            slime.attack(participant1);
-        } else {
-            participant2.attack(participant1);
-        }
-
-        if (!((Character) participant1).isAlive()) {
-            battleOver = true;
+        // 応援の効果を一時的なものにするため、攻撃後に攻撃力を元に戻す
+        if (princess != null && participant1 instanceof SuperHero) {
+            ((SuperHero) participant1).setBaseAttackPower(originalAttackPower);
         }
     }
 
-    // バトルを終了する
     public void endBattle() {
-        if (!((Character) participant1).isAlive()) {
-            System.out.println("\n" + ((Character) participant1).getName() + "は倒れた。");
-            System.out.println(((Character) participant2).getName() + "の勝利！");
-        } else if (!((Character) participant2).isAlive()) {
-            System.out.println("\n" + ((Character) participant2).getName() + "は倒れた。");
-            System.out.println(((Character) participant1).getName() + "の勝利！");
+        if (!participant1.isAlive()) {
+            System.out.println("\n" + participant1.getName() + "は倒れた！");
+            System.out.println(participant2.getName() + "の勝利！");
+        } else if (!participant2.isAlive()) {
+            System.out.println("\n" + participant2.getName() + "は倒れた！");
+            System.out.println(participant1.getName() + "の勝利！");
         } else if (participant1 instanceof Runner && ((Runner) participant1).isRunAway()) {
-            System.out.println("\n" + ((Character) participant1).getName() + "は逃げ出した。");
-            System.out.println(((Character) participant2).getName() + "の勝利！");
-        } else {
-            System.out.println("\nバトルは引き分けに終わった。");
+            System.out.println("\n" + participant1.getName() + "は逃げ出した！");
+            System.out.println(participant2.getName() + "の勝利！");
+        } else if (participant2 instanceof Runner && ((Runner) participant2).isRunAway()) {
+            System.out.println("\n" + participant2.getName() + "は逃げ出した！");
+            System.out.println(participant1.getName() + "の勝利！");
+        }
+
+        // 戦闘終了後に攻撃力を元に戻す
+        if (princess != null && participant1 instanceof SuperHero) {
+            ((SuperHero) participant1).setBaseAttackPower(originalAttackPower);
         }
     }
 
-    // バトルが終了したかどうかを確認する
     public boolean isBattleOver() {
         return battleOver;
     }
 
-    // ターン順を決定する
     public void determineTurnOrder() {
-        // シンプルに、participant1が先攻とする
-        System.out.println(((Character) participant1).getName() + "が先に攻撃する！");
+        // participant1が先攻とする
+        System.out.println(participant1.getName() + "が先に攻撃する！");
+    }
+
+    // 参加者の逃走状態とHPをリセットするメソッド
+    private void resetParticipants() {
+        // participant1 のリセット
+        if (participant1 instanceof Runner) {
+            ((Runner) participant1).resetRunAway();
+        }
+        participant1.setHp(participant1.getMaxHp());
+
+        // participant2 のリセット
+        if (participant2 instanceof Runner) {
+            ((Runner) participant2).resetRunAway();
+        }
+        participant2.setHp(participant2.getMaxHp());
     }
 }
