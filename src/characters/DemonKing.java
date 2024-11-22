@@ -5,13 +5,16 @@ import utility.Fighter;
 import utility.Runner;
 import utility.Talk;
 
+/**
+ * 魔王クラス
+ */
 public class DemonKing extends Character implements Fighter, Runner, Talk {
     private int baseAttackPower;
     private boolean runAway;
 
     public DemonKing(String name, int maxHp, int baseAttackPower) {
         super(name, maxHp);
-        this.baseAttackPower = baseAttackPower * 2; // 魔王は非常に強い
+        this.baseAttackPower = baseAttackPower * 3; // 魔王は非常に強い
         this.runAway = false;
     }
 
@@ -22,7 +25,7 @@ public class DemonKing extends Character implements Fighter, Runner, Talk {
 
     @Override
     public void attack(Fighter target) {
-        if (!isAlive()) {
+        if (runAway || !isAlive()) {
             System.out.println(getName() + "は攻撃できない！");
             return;
         }
@@ -36,6 +39,14 @@ public class DemonKing extends Character implements Fighter, Runner, Talk {
     public void takeDamage(int amount) {
         setHp(getHp() - amount);
         System.out.println(getName() + "は" + amount + "のダメージを受けた。（HP: " + getHp() + "/" + getMaxHp() + "）");
+
+        if (getHp() <= getMaxHp() / 2 && !runAway) {
+            // HPが50%以下になったら一定の確率で逃げる
+            if (Math.random() < 0.3) { // 30%の確率で逃げる
+                runAway();
+            }
+        }
+
         if (!isAlive()) {
             System.out.println(getName() + "は倒れた！");
         }
@@ -43,16 +54,17 @@ public class DemonKing extends Character implements Fighter, Runner, Talk {
 
     @Override
     public void runAway() {
-        System.out.println(getName() + "は逃げることを拒否した！");
+        runAway = true;
+        System.out.println(getName() + "は闇の中に消え去った！");
     }
 
     @Override
     public boolean isRunAway() {
-        return false; // 魔王は逃げない
+        return runAway;
     }
 
     @Override
     public void resetRunAway() {
-        // 何もしない
+        runAway = false;
     }
 }

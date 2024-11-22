@@ -17,7 +17,6 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
 
     public SuperHero(String name, int maxHp, int baseAttackPower) {
         super(name, maxHp);
-        setMaxHp(maxHp * 2); // スーパー勇者はHPが2倍
         this.baseAttackPower = baseAttackPower * 2; // スーパー勇者は攻撃力が2倍
         this.runAway = false;
         this.isFlying = false; // 初期状態では地上にいる
@@ -28,15 +27,14 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
         System.out.println(getName() + "：「" + message + "」");
     }
 
-    @Override
-    public void attack(Fighter target) {
+    // ユーザーの行動を選択するメソッド
+    public void takeTurn(Fighter target, Scanner scanner) {
         if (runAway || !isAlive()) {
             System.out.println(getName() + "は行動できない！");
             return;
         }
 
         // ユーザーの行動を選択する
-        Scanner scanner = new Scanner(System.in);
         System.out.println("\nあなたのターンです。行動を選択してください。");
         System.out.println("1: 攻撃");
         System.out.println("2: 逃げる");
@@ -54,9 +52,7 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
         switch (choice) {
             case 1:
                 // 攻撃処理
-                int damage = (int) (Math.random() * baseAttackPower) + 1;
-                System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
-                target.takeDamage(damage);
+                attack(target);
                 break;
             case 2:
                 // 逃げる
@@ -76,10 +72,15 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
                 break;
             default:
                 System.out.println("無効な選択です。攻撃します。");
-                damage = (int) (Math.random() * baseAttackPower) + 1;
-                System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
-                target.takeDamage(damage);
+                attack(target);
         }
+    }
+
+    @Override
+    public void attack(Fighter target) {
+        int damage = (int) (Math.random() * baseAttackPower) + 1;
+        System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
+        target.takeDamage(damage);
     }
 
     @Override

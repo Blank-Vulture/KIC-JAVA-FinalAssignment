@@ -1,11 +1,14 @@
 package system;
 
+import java.util.Scanner;
+
 /**
  * メインクラス
  */
 public class Main {
     public static void main(String[] args) {
-        GameScenario scenario = new GameScenario();
+    	Scanner scanner = new Scanner(System.in);
+        GameScenario scenario = new GameScenario(scanner);
         // 最初に王様に会いにいく。使命を与えられる。「魔王を倒してお姫様を助け出すこと」
         scenario.startScenario();
         
@@ -21,5 +24,7 @@ public class Main {
         
         //使命は完了してゲームは終了する。
         scenario.endScenario();
+        
+        scanner.close();
     }
 }

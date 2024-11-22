@@ -2,7 +2,7 @@ package system;
 
 import characters.*;
 import utility.Character;
-import utility.Fighter;
+import utility.Runner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,9 @@ public class GameScenario {
     private boolean wizardJoined;
     private Scanner scanner;
 
-    public GameScenario() {
+    public GameScenario(Scanner scanner) {
+        this.scanner = scanner; // Scannerを受け取る
         wizardJoined = false;
-        scanner = new Scanner(System.in);
     }
 
     // 最初に王様に会いにいく。使命を与えられる。
@@ -44,7 +44,7 @@ public class GameScenario {
         System.out.println("==================\n");
     }
 
-    // ゴブリン、スライム、ウェアウルフと戦闘。魔法使いの加入判定。
+    // パート1の実装
     public void part1() {
         System.out.println("=== パート1：冒険の始まり ===");
 
@@ -61,7 +61,12 @@ public class GameScenario {
             Character enemy = enemies.get(random.nextInt(enemies.size()));
 
             // 戦闘開始
-            Battle battle = new Battle(hero, enemy);
+            Battle battle;
+            if (wizardJoined) {
+                battle = new Battle(hero, enemy, wizard, null, scanner);
+            } else {
+                battle = new Battle(hero, enemy, null, null, scanner);
+            }
             battle.startBattle();
 
             // 勇者が倒れた場合、ゲームオーバー
@@ -75,17 +80,27 @@ public class GameScenario {
                 System.out.println(enemy.getName() + "を倒した！");
                 enemies.remove(enemy);
             } else if (hero.isRunAway()) {
-                // 勇者が逃げた場合、メインメニューに戻る
+                // 勇者が逃げた場合、冒険を続けるか確認
                 System.out.println("\n戦闘から逃げ出した。");
                 hero.resetRunAway(); // 逃走状態をリセット
-                break;
+                System.out.println("冒険を続けますか？（1: はい、2: いいえ）");
+                int choice;
+                try {
+                    choice = Integer.parseInt(scanner.nextLine());
+                } catch (Exception e) {
+                    choice = 2;
+                }
+                if (choice == 2) {
+                    System.out.println("ゲームを終了します。");
+                    System.exit(0);
+                }
             }
 
             // 魔法使いの加入判定
             if (!wizardJoined) {
                 if (random.nextBoolean()) { // 1/2の確率で仲間になる
                     System.out.println("\n誰かが近づいてくる...");
-                    wizard = new Wizard("魔法使い", 70, 1.5);
+                    wizard = new Wizard("魔法使い", 70, hero.getBaseAttackPower());
                     wizard.talk("私は旅の魔法使い。あなたの旅に同行しましょうか？");
 
                     System.out.println("魔法使いが仲間になることを誘っています。仲間にしますか？（1: はい、2: いいえ）");
@@ -115,7 +130,7 @@ public class GameScenario {
         }
     }
 
-    // 勇者がスーパー勇者にクラスチェンジする
+    // パート2の実装
     public void part2() {
         if (enemies.isEmpty() && wizardJoined) {
             System.out.println("\n=== スーパー勇者にクラスチェンジ！ ===");
@@ -129,12 +144,15 @@ public class GameScenario {
         }
     }
 
-    // スーパー勇者としての冒険と、魔王との戦闘、お姫様の応援
+    // パート3の実装
     public void part3() {
         System.out.println("=== パート3：最後の戦い ===");
 
-        // 敵のリストを再初期化（魔王のみ）
+        // 敵のリストを再初期化（ゴブリン、スライム、ウェアウルフ、魔王）
         enemies = new ArrayList<>();
+        enemies.add(new Goblin("ゴブリン", 50, superHero.getBaseAttackPower()));
+        enemies.add(new Slime("スライム", 30, superHero.getBaseAttackPower()));
+        enemies.add(new Werewolf("ウェアウルフ", 80, superHero.getBaseAttackPower()));
         enemies.add(new DemonKing("魔王", 200, superHero.getBaseAttackPower()));
 
         Random random = new Random();
@@ -142,13 +160,19 @@ public class GameScenario {
         boolean missionComplete = false;
 
         while (!missionComplete) {
-            // ランダムに敵を選択（今回は魔王のみ）
-            Character enemy = enemies.get(0);
+            // ランダムに敵を選択
+            Character enemy = enemies.get(random.nextInt(enemies.size()));
 
             // 魔王との戦闘ではお姫様が応援
-            princess = new Princess("お姫様", 9999);
-            Battle battle = new Battle(superHero, enemy, princess);
-            battle.startBattle();
+            if (enemy instanceof DemonKing) {
+                princess = new Princess("お姫様", 9999);
+                Battle battle = new Battle(superHero, enemy, wizardJoined ? wizard : null, princess, scanner);
+                battle.startBattle();
+            } else {
+                // 通常の戦闘
+                Battle battle = new Battle(superHero, enemy, wizardJoined ? wizard : null, null, scanner);
+                battle.startBattle();
+            }
 
             // スーパー勇者が倒れた場合、ゲームオーバー
             if (!superHero.isAlive()) {
@@ -156,30 +180,42 @@ public class GameScenario {
                 System.exit(0);
             }
 
-            // 魔王を倒した場合、使命完了
+            // 敵を倒した場合、リストから削除
             if (!enemy.isAlive()) {
+                System.out.println("\n" + enemy.getName() + "を倒した！");
+                enemies.remove(enemy);
+            } else if (superHero.isRunAway()) {
+                // スーパー勇者が逃げた場合、冒険を続けるか確認
+                System.out.println("\n戦闘から逃げ出した。");
+                superHero.resetRunAway(); // 逃走状態をリセット
+                System.out.println("冒険を続けますか？（1: はい、2: いいえ）");
+                int choice;
+                try {
+                    choice = Integer.parseInt(scanner.nextLine());
+                } catch (Exception e) {
+                    choice = 2;
+                }
+                if (choice == 2) {
+                    System.out.println("ゲームを終了します。");
+                    System.exit(0);
+                }
+            }
+
+            // 魔王を倒した場合、使命完了
+            if (enemy instanceof DemonKing && (!enemy.isAlive() || (enemy instanceof Runner && ((Runner) enemy).isRunAway()))) {
                 System.out.println("\n" + superHero.getName() + "は魔王を倒した！");
                 missionComplete = true;
                 enemies.remove(enemy);
-            } else if (superHero.isRunAway()) {
-                // スーパー勇者が逃げた場合、メインメニューに戻る
-                System.out.println("\n戦闘から逃げ出した。");
-                superHero.resetRunAway(); // 逃走状態をリセット
-                break;
             }
         }
     }
 
-    // 使命は完了してゲームは終了する
+    // エンディング
     public void endScenario() {
-        if (enemies.isEmpty()) {
             System.out.println("\n=== エンディング ===");
             princess.talk("ありがとうございます！" + superHero.getName() + "！");
             king.talk("よくぞ魔王を倒してくれた。お姫様を救い出してくれて感謝する。");
             System.out.println("\n=== ゲームクリア！ ===");
-        } else {
-            System.out.println("\nまだ使命は完了していません。");
-        }
         System.exit(0);
     }
 }

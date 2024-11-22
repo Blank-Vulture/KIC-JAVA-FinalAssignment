@@ -25,15 +25,14 @@ public class Hero extends Character implements Fighter, Runner, Talk {
         System.out.println(getName() + "：「" + message + "」");
     }
 
-    @Override
-    public void attack(Fighter target) {
+    // ユーザーの行動を選択するメソッド
+    public void takeTurn(Fighter target, Scanner scanner) {
         if (runAway || !isAlive()) {
             System.out.println(getName() + "は行動できない！");
             return;
         }
 
         // ユーザーの行動を選択する
-        Scanner scanner = new Scanner(System.in);
         System.out.println("\nあなたのターンです。行動を選択してください。");
         System.out.println("1: 攻撃");
         System.out.println("2: 逃げる");
@@ -50,9 +49,7 @@ public class Hero extends Character implements Fighter, Runner, Talk {
         switch (choice) {
             case 1:
                 // 攻撃処理
-                int damage = (int) (Math.random() * baseAttackPower) + 1;
-                System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
-                target.takeDamage(damage);
+                attack(target);
                 break;
             case 2:
                 // 逃げる
@@ -64,10 +61,15 @@ public class Hero extends Character implements Fighter, Runner, Talk {
                 break;
             default:
                 System.out.println("無効な選択です。攻撃します。");
-                damage = (int) (Math.random() * baseAttackPower) + 1;
-                System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
-                target.takeDamage(damage);
+                attack(target);
         }
+    }
+
+    @Override
+    public void attack(Fighter target) {
+        int damage = (int) (Math.random() * baseAttackPower) + 1;
+        System.out.println(getName() + "は" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
+        target.takeDamage(damage);
     }
 
     @Override
