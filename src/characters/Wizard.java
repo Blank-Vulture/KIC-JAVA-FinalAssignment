@@ -23,8 +23,9 @@ public class Wizard extends Character implements Fighter, Talk {
             System.out.println(getName() + "は攻撃できない！");
             return;
         }
-        int damage = (int) (10 * magicAttackMultiplier);
-        System.out.println(getName() + "は魔法で" + ((utility.Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
+
+        int damage = (int) ((Math.random() * 20) * magicAttackMultiplier) + 5;
+        System.out.println(getName() + "は魔法で" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
         target.takeDamage(damage);
     }
 
@@ -33,7 +34,7 @@ public class Wizard extends Character implements Fighter, Talk {
         setHp(getHp() - amount);
         System.out.println(getName() + "は" + amount + "のダメージを受けた。（HP: " + getHp() + "/" + getMaxHp() + "）");
         if (!isAlive()) {
-            System.out.println(getName() + "は倒れてしまった！");
+            System.out.println(getName() + "は倒れた！");
         }
     }
 

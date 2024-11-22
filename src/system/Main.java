@@ -1,37 +1,25 @@
 package system;
 
-import characters.Hero;
-import characters.Slime;
-import utility.Talk; // utility.Talkをインポート
-
+/**
+ * メインクラス
+ */
 public class Main {
     public static void main(String[] args) {
-        // ゲームシナリオを作成
         GameScenario scenario = new GameScenario();
-
-        // ヒーローを作成
-        Hero hero = new Hero("勇者アーサー", 100, 20);
-
-        // スライムを作成
-        Slime slime = new Slime("スライム", 30, 5);
-
-        // キャラクターをシナリオに追加
-        scenario.addCharacter(hero);
-        scenario.addCharacter(slime);
-
-        // トークイベントをテスト的に実装
-        System.out.println("\n=== メインプログラムでのトークイベント ===");
-        Talk talkingCharacter = hero; // HeroはTalkを実装しているため、Talk型に代入可能
-        talkingCharacter.talk("これから冒険が始まる！");
-        System.out.println("================================\n");
-
-        // シナリオを開始
+        // 最初に王様に会いにいく。使命を与えられる。「魔王を倒してお姫様を助け出すこと」
         scenario.startScenario();
-
-        // ヒーローとスライムのバトルを開始
-        scenario.startBattle(hero, slime);
-
-        // シナリオの次の部分に進む
-        scenario.proceedToNextScenarioPart();
+        
+        // まずはゴブリン、スライム、ウェアウルフとランダム順で戦闘。戦闘終了の度に魔法使いの加入判定をかける。魔法使いが勇者のパーティに加入する確率は1/2。
+        scenario.part1();
+        
+        // ゴブリン、スライム、ウェアウルフを全て倒し魔法使いと仲間になっている場合、勇者はスーパー勇者になる。スーパー勇者は飛ぶ能力を持つ。
+        scenario.part2();
+        
+        // スーパー勇者になったあと、ゴブリン、スライム、ウェアウルフ、魔王のいずれか敵にあう。どの敵に会うかはランダム。
+        // 魔王と戦っている間はお姫様がスーパー勇者を応援する。スーパー勇者の攻撃力が応援で一時的に上昇する。
+        scenario.part3();
+        
+        //使命は完了してゲームは終了する。
+        scenario.endScenario();
     }
 }

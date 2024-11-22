@@ -19,6 +19,7 @@ public abstract class Character {
         return hp;
     }
 
+    // 修正された setHp メソッド
     public void setHp(int hp) {
         if (hp > maxHp) {
             this.hp = maxHp;
