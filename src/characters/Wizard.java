@@ -4,12 +4,16 @@ import utility.Character;
 import utility.Fighter;
 import utility.Talk;
 
+/**
+ * 魔法使いクラス
+ */
 public class Wizard extends Character implements Fighter, Talk {
-    private double magicAttackMultiplier;
+    private int maxAttackPower;
 
-    public Wizard(String name, int maxHp, double magicAttackMultiplier) {
+    public Wizard(String name, int maxHp, int heroBaseAttackPower) {
         super(name, maxHp);
-        this.magicAttackMultiplier = magicAttackMultiplier;
+        // 魔法使いの最大攻撃力は勇者の1.5倍
+        this.maxAttackPower = (int) (heroBaseAttackPower * 1.5);
     }
 
     @Override
@@ -24,7 +28,8 @@ public class Wizard extends Character implements Fighter, Talk {
             return;
         }
 
-        int damage = (int) ((Math.random() * 20) * magicAttackMultiplier) + 5;
+        // ダメージを0から最大攻撃力までの乱数で決定
+        int damage = (int) (Math.random() * maxAttackPower) + 1;
         System.out.println(getName() + "は魔法で" + ((Character) target).getName() + "を攻撃した！" + damage + "のダメージ！");
         target.takeDamage(damage);
     }
@@ -38,11 +43,11 @@ public class Wizard extends Character implements Fighter, Talk {
         }
     }
 
-    public double getMagicAttackMultiplier() {
-        return magicAttackMultiplier;
+    public int getMaxAttackPower() {
+        return maxAttackPower;
     }
 
-    public void setMagicAttackMultiplier(double magicAttackMultiplier) {
-        this.magicAttackMultiplier = magicAttackMultiplier;
+    public void setMaxAttackPower(int maxAttackPower) {
+        this.maxAttackPower = maxAttackPower;
     }
 }

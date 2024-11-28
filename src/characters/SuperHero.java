@@ -16,7 +16,7 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
     private boolean isFlying;
 
     public SuperHero(String name, int maxHp, int baseAttackPower) {
-        super(name, maxHp);
+        super(name, maxHp * 3); // スーパー勇者はHPが3倍);
         this.baseAttackPower = baseAttackPower * 2; // スーパー勇者は攻撃力が2倍
         this.runAway = false;
         this.isFlying = false; // 初期状態では地上にいる
@@ -39,14 +39,25 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
         System.out.println("1: 攻撃");
         System.out.println("2: 逃げる");
         System.out.println("3: " + (isFlying ? "着陸する" : "飛ぶ"));
-        System.out.println("4: 眠る");
-        System.out.print("選択肢（1-4）: ");
+
+        // 飛んでいない場合のみ「眠る」選択肢を表示
+        if (!isFlying) {
+            System.out.println("4: 眠る");
+        }
+        System.out.print("選択肢を入力してください: ");
         int choice;
         try {
             choice = Integer.parseInt(scanner.nextLine());
         } catch (Exception e) {
             choice = 1;
             System.out.println("無効な入力です。攻撃します。");
+        }
+
+        // 飛行状態に応じて選択肢を処理
+        if (isFlying && choice == 4) {
+            System.out.println("無効な選択です。攻撃します。");
+            attack(target);
+            return;
         }
 
         switch (choice) {
@@ -67,7 +78,7 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
                 }
                 break;
             case 4:
-                // 眠る
+                // 眠る（地上にいる場合のみ）
                 sleep();
                 break;
             default:
@@ -136,9 +147,13 @@ public class SuperHero extends Character implements Fighter, Runner, Talk {
 
     // 眠るメソッド
     public void sleep() {
-        System.out.println(getName() + "は眠ってHPを回復した！");
-        setHp(getMaxHp());
-        System.out.println("（HP: " + getHp() + "/" + getMaxHp() + "）");
+        if (isFlying) {
+            System.out.println(getName() + "は飛んでいるので眠れない！");
+        } else {
+            System.out.println(getName() + "は眠ってHPを回復した！");
+            setHp(getMaxHp());
+            System.out.println("（HP: " + getHp() + "/" + getMaxHp() + "）");
+        }
     }
 
     public boolean isFlying() {

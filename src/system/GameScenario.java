@@ -32,7 +32,7 @@ public class GameScenario {
         // 勇者の名前を入力
         System.out.print("勇者の名前を入力してください: ");
         String heroName = scanner.nextLine();
-        hero = new Hero(heroName, 100, 20);
+        hero = new Hero(heroName, 100, 30);
 
         // 王様に会う
         king = new King("王様", 9999);
@@ -100,7 +100,7 @@ public class GameScenario {
             if (!wizardJoined) {
                 if (random.nextBoolean()) { // 1/2の確率で仲間になる
                     System.out.println("\n誰かが近づいてくる...");
-                    wizard = new Wizard("魔法使い", 70, hero.getBaseAttackPower());
+                    wizard = new Wizard("魔法使い", 80, hero.getBaseAttackPower());
                     wizard.talk("私は旅の魔法使い。あなたの旅に同行しましょうか？");
 
                     System.out.println("魔法使いが仲間になることを誘っています。仲間にしますか？（1: はい、2: いいえ）");
